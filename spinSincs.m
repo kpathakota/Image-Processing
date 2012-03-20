@@ -8,7 +8,7 @@ firLength = 510;%should be odd and small (make it simple)
 transitionLength = .01;
 edgeLength = 511;
 lpfWidth = 0.2;
-freqShift1 = 0.2;
+freqShift1 = 0.25;
 h = firpm(firLength,[0 lpfWidth lpfWidth+transitionLength 1],[1 1 0 0]);
 
 
@@ -33,7 +33,7 @@ grid
 %%  Introducing the edge
 
 % Plotting the edge that has been created
-x = (1+erf((0:edgeLength-1)-(edgeLength)/2))/2;
+x = makeEdge(edgeLength,.25,1,0);
 figure;
 plot(x);
 axis([-1 512 -0.1 1.1]);
@@ -73,18 +73,21 @@ title('DTFT of complex filtered edge');
 
 %% Sample 512 phase
 
+range = 400:600;
 phase(ys(512))
 figure;
-lPhase = phase(ys(508:515));  % Local Phase
-plot(508:515, lPhase);
+lPhase = mod(phase(ys(range)), 2*pi);  % Local Phase
+plot(range, lPhase);
 title('Phase around sample');
-
 figure;
-dPhase = zeros(1,10);  % dPhase/dn
-for i= 1:10
-    dPhase(i) = phase(ys(509+i))- phase(ys(508+i));
+dPhase = zeros(1,length(range));  % dPhase/dn
+for i = range
+    dPhase(i) = phase(ys(i))- phase(ys(i-1));
+    if(dPhase(i)<0)
+       dPhase(i) = 2*pi + dPhase(i);
+    end
 end
-plot(510:519, dPhase);
+plot(range, dPhase(range));
 title('Derivative of phase in the neighborhood of 512');
 
 
